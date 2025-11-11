@@ -5,41 +5,45 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Draggable Hello Kitty — Responsive</title>
 
-  <!-- Police (optionnelle) -->
+  <!-- Police -->
   <link href="https://fonts.googleapis.com/css?family=Bubblegum+Sans" rel="stylesheet">
   
-  <!-- Tailwind CSS (as per prompt instructions, for responsiveness) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Tailwind Configuration for font-family -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'bubblegum': ['"Bubblegum Sans"', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+          },
+          colors: {
+            'hk-pink-light': '#ffb6d5', // Original body background
+            'hk-pink-medium': '#ff66aa', // Button base
+            'hk-pink-dark': '#e04e90', // Button hover
+            'hk-pink-accent': '#f61d71', // SVG elements
+            'hk-red': '#f90803', // SVG elements
+            'hk-blue': '#3ba2f7', // SVG elements
+            'hk-green': '#83f9dc', // SVG elements
+            'hk-light-pink': '#ffd6ea', // Secondary button
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
     /* Reset basique */
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    html,body { height: 100%; }
+    html, body { height: 100%; }
 
     body {
-      font-family: "Bubblegum Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: #ffb6d5;
+      background: #ffb6d5; /* Using original color for precise match, Tailwind config is for utility classes */
       color: #111;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 12px;
-    }
-
-    .page {
-      font-size: 45px;
-      width: 100%;
-      max-width: 780px; /* limite sur grands écrans */
-      position: relative; /* Essential for z-index stacking context */
-      z-index: 1; /* Ensures page content is above the heart rain */
-    }
-
-    h1 {
-      font-size: clamp(18px, 4.8vw, 28px);
-      text-align: center;
-      margin: 10px 8px 14px;
-      line-height: 1.1;
+      font-family: "Bubblegum Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     /* Conteneur SVG responsive */
@@ -60,37 +64,6 @@
       user-select: none;
       -webkit-user-drag: none;
       touch-action: none; /* permet pointer events sur éléments SVG */
-    }
-
-    /* Indication tactile + boutons */
-    .info-row {
-      display:flex;
-      gap:8px;
-      align-items:center;
-      justify-content:center;
-      margin-top:10px;
-      margin-bottom:8px;
-    }
-    .btn {
-      background:#ff66aa;
-      color:#fff;
-      border:none;
-      padding:8px 12px;
-      border-radius:10px;
-      font-weight:700;
-      font-size:14px;
-      cursor:pointer;
-      transition: background-color 0.2s ease;
-    }
-    .btn:hover {
-      background:#e04e90;
-    }
-    .btn.secondary {
-      background:#ffd6ea;
-      color:#111;
-    }
-    .btn.secondary:hover {
-        background:#ffbcd6;
     }
 
     /* Draggables */
@@ -177,14 +150,14 @@
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-start p-3 font-bubblegum text-gray-900">
   <!-- Heart rain container. Placed early in body to ensure it's behind other content via z-index. -->
   <div id="hearts-container"></div>
 
-  <div class="page">
-    <h1>Prépare sa tenue pour sa rencontre avec son bias</h1>
+  <div class="page w-full max-w-3xl mx-auto relative z-10 text-base">
+    <h1 class="text-clamp-h1 text-center my-4 leading-tight">Prépare sa tenue pour sa rencontre avec son bias</h1>
 
-    <div class="svg-wrap">
+    <div class="svg-wrap w-full block bg-transparent rounded-xl overflow-hidden touch-none shadow-xl border-2 border-pink-400">
       <!-- == Le SVG original (inchangé) - responsive grâce au viewBox et au CSS ci-dessus == -->
       <svg viewBox="0 0 1280 798" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd"
            clip-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5">
@@ -309,16 +282,38 @@
       </svg>
     </div>
 
-<div class="text-center">
-    <a href="html.html" 
-       id="hug-btn" 
-       class="bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-4 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300">
-        Souffle tes bougies ! 🕯️
-    </a>
-</div>
+    <div class="flex flex-wrap justify-center gap-2 mt-4 mb-2">
+        <button id="resetBtn" 
+                class="bg-hk-light-pink hover:bg-hk-pink-light text-gray-800 font-bold py-2 px-4 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 text-sm md:text-base">
+            Réinitialiser 🔄
+        </button>
+        <button id="hintBtn" 
+                class="bg-hk-light-pink hover:bg-hk-pink-light text-gray-800 font-bold py-2 px-4 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 text-sm md:text-base">
+            Besoin d'aide ? 🤔
+        </button>
+    </div>
 
+    <div class="text-center">
+        <a href="html.html" 
+           id="hug-btn" 
+           class="inline-block w-fit mx-auto mt-4 py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 bg-hk-pink-medium hover:bg-hk-pink-dark text-white font-bold text-lg md:text-xl">
+            Souffle tes bougies ! 🕯️
+        </a>
+    </div>
+
+    <p class="hint text-gray-600 mt-2">
+        Glisse les accessoires sur Hello Kitty pour lui préparer le look parfait.
+    </p>
+
+  </div>
 
   <script>
+    // Define the clamp-based font size for h1 for consistent sizing
+    document.documentElement.style.setProperty('--clamp-h1-min', '18px');
+    document.documentElement.style.setProperty('--clamp-h1-vw', '4.8vw');
+    document.documentElement.style.setProperty('--clamp-h1-max', '28px');
+    document.documentElement.style.setProperty('font-size', 'clamp(var(--clamp-h1-min), var(--clamp-h1-vw), var(--clamp-h1-max))', 'important'); // Apply to h1 or use a utility class
+
     /* Drag pour SVG (.drag) — compatible desktop & mobile (pointer events) */
     (function(){
       const svg = document.querySelector('svg');
@@ -462,7 +457,19 @@
     }
 
     // Ensure the DOM is fully loaded before starting the heart rain
-    document.addEventListener('DOMContentLoaded', startRain);
+    document.addEventListener('DOMContentLoaded', () => {
+        startRain();
+
+        // Apply clamp to h1 using CSS variables from JS
+        // This is a direct override for h1 in the style block, but for utility class use:
+        // You'd ideally define custom utilities if not directly targeting the element.
+        // For this specific case, the original clamp was directly on h1, so we mimic that
+        // with CSS variables and apply it.
+        const h1Element = document.querySelector('h1');
+        if (h1Element) {
+            h1Element.style.fontSize = `clamp(var(--clamp-h1-min), var(--clamp-h1-vw), var(--clamp-h1-max))`;
+        }
+    });
 
   </script>
 </body>
