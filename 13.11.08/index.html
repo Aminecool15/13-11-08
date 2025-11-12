@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,6 +23,27 @@
         font-family: 'Pixelify Sans', sans-serif;
         color: #555;
       }
+
+      #startButton {
+        margin-top: 20px;
+        background-color: #ffb6c1;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-family: 'Pixelify Sans', sans-serif;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      #startButton:hover {
+        background-color: #ff9eb0;
+        transform: scale(1.05);
+      }
+
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -31,10 +52,11 @@
       <div class="cake-container">
         <div class="cake" id="cake"></div>
       </div>
+      <button id="startButton">🎤 Activer le micro</button>
     </div>
 
     <script>
-      // Read URL params
+      // === Lecture des paramètres URL ===
       const params = new URLSearchParams(window.location.search);
       const name = params.get("name") || "Sima";
       let candleCount = parseInt(params.get("candles")) || 4;
@@ -43,17 +65,11 @@
       const birthdayText = document.getElementById("birthdayText");
       birthdayText.innerHTML = `
         <div id="mainTitle">Joyeux anniversaire ${name}!</div>
-        <div id="subTitle">Souffle tes bougies ! ( souffle vraiment sur l'écran ) 🎉</div>
+        <div id="subTitle">Souffle tes bougies ! (active d'abord le micro 🎤)</div>
       `;
 
       const cake = document.getElementById("cake");
-
-      const colors = [
-        "green-candle",
-        "purple-candle",
-        "blue-candle",
-        "yellow-candle",
-      ];
+      const colors = ["green-candle", "purple-candle", "blue-candle", "yellow-candle"];
       const CAKE_VISUAL_WIDTH = 35;
 
       function createCandles(count) {
@@ -72,12 +88,8 @@
 
           const row = Math.floor(i / candlesPerRow);
           const col = i % candlesPerRow;
-          const totalCandlesInRow = Math.min(
-            candlesPerRow,
-            count - row * candlesPerRow
-          );
+          const totalCandlesInRow = Math.min(candlesPerRow, count - row * candlesPerRow);
           const rowSpacing = availableWidth / (totalCandlesInRow + 1);
-
           const leftBase = rowSpacing * (col + 1) - CANDLE_VISUAL_WIDTH / 2 + 5;
           const rowShift = row % 2 === 0 ? 0 : shiftAmount;
 
@@ -91,22 +103,22 @@
 
       createCandles(candleCount);
 
-      // === Microphone / Blow Detection ===
+      // === Détection du souffle ===
       async function startMicDetection() {
         try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          await audioContext.resume();
+
           const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: { echoCancellation: false, noiseSuppression: false },
           });
-          const audioContext = new (window.AudioContext ||
-            window.webkitAudioContext)();
+
           const source = audioContext.createMediaStreamSource(stream);
           const analyser = audioContext.createAnalyser();
           analyser.fftSize = 512;
-
           source.connect(analyser);
 
           const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
           let blown = false;
 
           function detectBlow() {
@@ -114,20 +126,15 @@
 
             let highFreqSum = 0;
             let lowFreqSum = 0;
-
             const midpoint = dataArray.length / 2;
 
             for (let i = 0; i < dataArray.length; i++) {
-              if (i < midpoint) {
-                lowFreqSum += dataArray[i];
-              } else {
-                highFreqSum += dataArray[i];
-              }
+              if (i < midpoint) lowFreqSum += dataArray[i];
+              else highFreqSum += dataArray[i];
             }
 
-            const highAvg = highFreqSum / (dataArray.length / 2);
-            const lowAvg = lowFreqSum / (dataArray.length / 2);
-
+            const highAvg = highFreqSum / midpoint;
+            const lowAvg = lowFreqSum / midpoint;
             const ratio = highAvg / (lowAvg + 1);
 
             const BLOW_RATIO_THRESHOLD = 0.5;
@@ -142,7 +149,8 @@
 
           detectBlow();
         } catch (err) {
-          console.error("Mic access error:", err);
+          console.error("Erreur micro:", err);
+          alert("Impossible d'accéder au micro. Vérifie les permissions dans Safari.");
         }
       }
 
@@ -159,14 +167,18 @@
           }, delay);
         });
 
-        // Update subTitle after short delay
         setTimeout(() => {
-          const subTitle = document.getElementById("subTitle");
-          subTitle.textContent = `Souffle tes bougies ! ( souffle vraiment sur l'écran ) 🎉`;
+          document.getElementById("subTitle").textContent = "Bougies éteintes ! 🎉";
         }, 1200);
       }
 
-      startMicDetection();
+      // === Activation manuelle sur iPhone ===
+      const startButton = document.getElementById("startButton");
+      startButton.addEventListener("click", async () => {
+        startButton.classList.add("hidden");
+        document.getElementById("subTitle").textContent = "Souffle sur l'écran 🎂";
+        await startMicDetection();
+      });
     </script>
   </body>
 </html>
