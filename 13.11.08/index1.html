@@ -166,10 +166,10 @@
 
     <div class="svg-wrap w-full block bg-transparent rounded-xl overflow-hidden touch-none shadow-xl border-2 border-pink-400">
       <!-- == Le SVG original (inchangé) - responsive grâce au viewBox et au CSS ci-dessus == -->
-      <svg id="helloKittySvg" viewBox="0 0 1280 798" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd"
+      <svg id="helloKittySvg" viewBox="0 -402 1200 1300" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd"
            clip-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5">
         <!-- (Ton SVG complet copié tel quel) -->
-  <g transform="translate(0 -2.018)">
+  <g transform="translate(-44 -87.018)">
     <g id="kitty" transform="translate(-205.251 -179.567)">
       <path d="M814.599 537.236s-26.83 59.85-18.082 73.419c9.546 14.806 9.927 13.154 17.792 14.774 12.676 2.61 34.064-1.645 33.937-1.67l.233-30.656-.233 30.656s33.545 3.472 38.742 1.327c2.786-1.149 9.194-6.648 12.343-14.317 2.957-7.204 2.808-16.437 1.012-22.379-3.707-12.268-17.73-50.045-17.73-50.045-23.768 3.302-46.47 3.035-68.014-1.109z" fill="#fff" stroke="#000" stroke-width="4.5"/>
       <path d="M808.064 536.983s-10.107 12.462-16.013 13.65c-4.637.934-13.232-.875-14.938 5.026-.894 3.094 3.616 9.767 3.616 9.767-3.21.379-7.131 13.458-1.674 16.504 3.612 2.017 13.059 7.317 16.407 3.226 5.849-7.148 18.688-46.109 18.688-46.109l-6.086-2.064zM888.706 536.316s10.107 12.462 16.013 13.65c4.637.934 13.232-.875 14.938 5.026.894 3.094-3.616 9.767-3.616 9.767 3.21.379 7.131 13.458 1.674 16.504-3.612 2.017-13.059 7.317-16.407 3.226-5.849-7.148-18.688-46.11-18.688-46.11l6.086-2.063z" fill="#fff" stroke="#000" stroke-width="4.5"/>
@@ -320,11 +320,11 @@
     document.documentElement.style.setProperty('--clamp-h1-vw', '7vw');   // Slightly increased vw scaling
     document.documentElement.style.setProperty('--clamp-h1-max', '38px'); // Slightly increased max size
     
-    // Default SVG viewBox dimensions
-    const originalViewBoxWidth = 1280;
-    const originalViewBoxHeight = 798;
-    const mobileViewBoxWidth = 800; // Smaller viewBox width makes content appear larger
-    const mobileViewBoxHeight = originalViewBoxHeight * (mobileViewBoxWidth / originalViewBoxWidth); // Maintain aspect ratio
+    // Default SVG viewBox dimensions (master dimensions for scaling)
+    const masterViewBoxX = 0;
+    const masterViewBoxY = -402;
+    const masterViewBoxWidth = 1200;
+    const masterViewBoxHeight = 1300;
     const breakpoint = 768; // Adjust viewBox for screens smaller than this
 
     /* Drag pour SVG (.drag) — compatible desktop & mobile (pointer events) */
@@ -334,13 +334,31 @@
 
       // Function to set the viewBox based on screen width
       function adjustSvgViewBox() {
-        if (window.innerWidth <= breakpoint) {
-          svg.setAttribute('viewBox', `0 0 ${mobileViewBoxWidth} ${mobileViewBoxHeight}`);
-        } else {
-          svg.setAttribute('viewBox', `0 0 ${originalViewBoxWidth} ${originalViewBoxHeight}`);
-        }
-      }
+        let currentViewBoxX = masterViewBoxX;
+        let currentViewBoxY = masterViewBoxY;
+        let currentViewBoxWidth = masterViewBoxWidth;
+        let currentViewBoxHeight = masterViewBoxHeight;
 
+        if (window.innerWidth <= breakpoint) {
+          // For mobile, we want to zoom in (make content appear larger)
+          // Let's target a mobile specific viewBox width, for example, 900
+          const mobileTargetWidth = 900; // This value makes the content wider, hence appearing "zoomed in"
+          const scaleFactor = mobileTargetWidth / masterViewBoxWidth;
+          
+          currentViewBoxWidth = mobileTargetWidth;
+          currentViewBoxHeight = masterViewBoxHeight * scaleFactor;
+          
+          // Adjust X and Y origin to keep the "center" of the master viewBox centered in the new mobile viewBox
+          const masterCenterX = masterViewBoxX + masterViewBoxWidth / 2;
+          const masterCenterY = masterViewBoxY + masterViewBoxHeight / 2;
+
+          currentViewBoxX = masterCenterX - (currentViewBoxWidth / 2);
+          currentViewBoxY = masterCenterY - (currentViewBoxHeight / 2);
+        }
+        
+        svg.setAttribute('viewBox', `${currentViewBoxX} ${currentViewBoxY} ${currentViewBoxWidth} ${currentViewBoxHeight}`);
+      }
+      
       // Initial adjustment
       adjustSvgViewBox();
       // Adjust on window resize
