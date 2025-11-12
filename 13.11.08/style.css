@@ -15,10 +15,13 @@ body {
 
 
 #birthdayText {
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 5vw, 3rem); /* s’adapte à la largeur de l’écran */
   margin-bottom: 20px;
   color: #333;
+  text-align: center;      /* centre le texte */
+  word-wrap: break-word;   /* évite que le texte dépasse sur mobile */
 }
+
 
 
 .container {
