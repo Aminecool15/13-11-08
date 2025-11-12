@@ -11,19 +11,26 @@
       href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
       rel="stylesheet"
     />
+
     <style>
+      /* === TEXTES RESPONSIFS === */
       #mainTitle {
-        font-size: 32px;
         font-family: 'Pixelify Sans', sans-serif;
+        font-size: clamp(20px, 6vw, 36px);
         margin-bottom: 8px;
+        text-align: center;
+        word-break: break-word;
       }
 
       #subTitle {
-        font-size: 18px;
         font-family: 'Pixelify Sans', sans-serif;
+        font-size: clamp(14px, 4.5vw, 22px);
         color: #555;
+        text-align: center;
+        margin: 0 10px;
       }
 
+      /* === BOUTON MICRO === */
       #startButton {
         margin-top: 20px;
         background-color: #ffb6c1;
@@ -31,7 +38,7 @@
         padding: 12px 24px;
         border-radius: 12px;
         font-family: 'Pixelify Sans', sans-serif;
-        font-size: 18px;
+        font-size: clamp(14px, 4.5vw, 20px);
         cursor: pointer;
         transition: all 0.3s ease;
       }
@@ -44,8 +51,26 @@
       .hidden {
         display: none;
       }
+
+      /* === STRUCTURE GLOBALE === */
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+      }
+
+      .cake-container {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+      }
     </style>
   </head>
+
   <body>
     <div class="container">
       <div id="birthdayText"></div>
@@ -64,7 +89,7 @@
 
       const birthdayText = document.getElementById("birthdayText");
       birthdayText.innerHTML = `
-        <div id="mainTitle">Joyeux anniversaire <br>${name}!</br> </div>
+        <div id="mainTitle">Joyeux anniversaire ${name}!</div>
         <div id="subTitle">Souffle tes bougies ! (active d'abord le micro 🎤)</div>
       `;
 
@@ -103,7 +128,7 @@
 
       createCandles(candleCount);
 
-      // === Détection du souffle (version sensible) ===
+      // === Détection du souffle (sensible) ===
       async function startMicDetection() {
         try {
           const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -131,7 +156,7 @@
             }
 
             const avgAmplitude = total / dataArray.length;
-            const BLOW_AMPLITUDE_THRESHOLD = 8; // plus bas = plus sensible (6 à 8 conseillé)
+            const BLOW_AMPLITUDE_THRESHOLD = 8; // plus bas = plus sensible (6 à 8 recommandé)
 
             if (avgAmplitude > BLOW_AMPLITUDE_THRESHOLD && !blown) {
               blown = true;
