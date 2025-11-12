@@ -103,7 +103,7 @@
 
       createCandles(candleCount);
 
-      // === Détection du souffle ===
+      // === Détection du souffle (version sensible) ===
       async function startMicDetection() {
         try {
           const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -118,28 +118,22 @@
           analyser.fftSize = 512;
           source.connect(analyser);
 
-          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          const dataArray = new Uint8Array(analyser.fftSize);
           let blown = false;
 
           function detectBlow() {
-            analyser.getByteFrequencyData(dataArray);
+            analyser.getByteTimeDomainData(dataArray);
 
-            let highFreqSum = 0;
-            let lowFreqSum = 0;
-            const midpoint = dataArray.length / 2;
-
+            let total = 0;
             for (let i = 0; i < dataArray.length; i++) {
-              if (i < midpoint) lowFreqSum += dataArray[i];
-              else highFreqSum += dataArray[i];
+              const deviation = Math.abs(dataArray[i] - 128);
+              total += deviation;
             }
 
-            const highAvg = highFreqSum / midpoint;
-            const lowAvg = lowFreqSum / midpoint;
-            const ratio = highAvg / (lowAvg + 1);
+            const avgAmplitude = total / dataArray.length;
+            const BLOW_AMPLITUDE_THRESHOLD = 8; // plus bas = plus sensible (6 à 8 conseillé)
 
-            const BLOW_RATIO_THRESHOLD = 0.5;
-
-            if (ratio > BLOW_RATIO_THRESHOLD && !blown) {
+            if (avgAmplitude > BLOW_AMPLITUDE_THRESHOLD && !blown) {
               blown = true;
               blowOutCandles();
             }
