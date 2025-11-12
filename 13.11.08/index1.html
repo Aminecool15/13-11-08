@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Draggable Hello Kitty — Responsive</title>
 
   <!-- Police -->
@@ -46,6 +46,14 @@
       font-family: "Bubblegum Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
+    h1 {
+      /* Further increased min size for better mobile readability */
+      font-size: clamp(28px, 7vw, 38px); 
+      text-align: center;
+      margin: 10px 8px 14px;
+      line-height: 1.1;
+    }
+
     /* Conteneur SVG responsive */
     .svg-wrap {
       width: 100%;
@@ -76,7 +84,6 @@
     /* Petite aide en bas */
     .hint {
       text-align:center;
-      font-size:12px;
       color:#666;
       margin-top:8px;
       padding-bottom:6px;
@@ -154,12 +161,12 @@
   <!-- Heart rain container. Placed early in body to ensure it's behind other content via z-index. -->
   <div id="hearts-container"></div>
 
-  <div class="page w-full max-w-3xl mx-auto relative z-10 text-base">
-    <h1 class="text-clamp-h1 text-center my-4 leading-tight">Prépare sa tenue pour sa rencontre avec son bias</h1>
+  <div class="page w-full max-w-3xl mx-auto relative z-10 text-base sm:text-lg">
+    <h1 class="text-center my-4 leading-tight">Prépare sa tenue pour sa rencontre avec son bias</h1>
 
     <div class="svg-wrap w-full block bg-transparent rounded-xl overflow-hidden touch-none shadow-xl border-2 border-pink-400">
       <!-- == Le SVG original (inchangé) - responsive grâce au viewBox et au CSS ci-dessus == -->
-      <svg viewBox="0 0 1280 798" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd"
+      <svg id="helloKittySvg" viewBox="0 0 1280 798" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd"
            clip-rule="evenodd" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="1.5">
         <!-- (Ton SVG complet copié tel quel) -->
   <g transform="translate(0 -2.018)">
@@ -284,11 +291,11 @@
 
     <div class="flex flex-wrap justify-center gap-2 mt-4 mb-2">
         <button id="resetBtn" 
-                class="bg-hk-light-pink hover:bg-hk-pink-light text-gray-800 font-bold py-2 px-4 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 text-sm md:text-base">
+                class="bg-hk-light-pink hover:bg-hk-pink-light text-gray-800 font-bold py-2 px-4 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 text-base">
             Réinitialiser 🔄
         </button>
         <button id="hintBtn" 
-                class="bg-hk-light-pink hover:bg-hk-pink-light text-gray-800 font-bold py-2 px-4 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 text-sm md:text-base">
+                class="bg-hk-light-pink hover:bg-hk-pink-light text-gray-800 font-bold py-2 px-4 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 text-base">
             Besoin d'aide ? 🤔
         </button>
     </div>
@@ -296,12 +303,12 @@
     <div class="text-center">
         <a href="html.html" 
            id="hug-btn" 
-           class="inline-block w-fit mx-auto mt-4 py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 bg-hk-pink-medium hover:bg-hk-pink-dark text-white font-bold text-lg md:text-xl">
+           class="inline-block w-fit mx-auto mt-4 py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 bg-hk-pink-medium hover:bg-hk-pink-dark text-white font-bold text-xl">
             Souffle tes bougies ! 🕯️
         </a>
     </div>
 
-    <p class="hint text-gray-600 mt-2">
+    <p class="hint text-base text-gray-600 mt-2">
         Glisse les accessoires sur Hello Kitty pour lui préparer le look parfait.
     </p>
 
@@ -309,15 +316,36 @@
 
   <script>
     // Define the clamp-based font size for h1 for consistent sizing
-    document.documentElement.style.setProperty('--clamp-h1-min', '18px');
-    document.documentElement.style.setProperty('--clamp-h1-vw', '4.8vw');
-    document.documentElement.style.setProperty('--clamp-h1-max', '28px');
-    document.documentElement.style.setProperty('font-size', 'clamp(var(--clamp-h1-min), var(--clamp-h1-vw), var(--clamp-h1-max))', 'important'); // Apply to h1 or use a utility class
+    document.documentElement.style.setProperty('--clamp-h1-min', '28px'); // Increased min size
+    document.documentElement.style.setProperty('--clamp-h1-vw', '7vw');   // Slightly increased vw scaling
+    document.documentElement.style.setProperty('--clamp-h1-max', '38px'); // Slightly increased max size
+    
+    // Default SVG viewBox dimensions
+    const originalViewBoxWidth = 1280;
+    const originalViewBoxHeight = 798;
+    const mobileViewBoxWidth = 800; // Smaller viewBox width makes content appear larger
+    const mobileViewBoxHeight = originalViewBoxHeight * (mobileViewBoxWidth / originalViewBoxWidth); // Maintain aspect ratio
+    const breakpoint = 768; // Adjust viewBox for screens smaller than this
 
     /* Drag pour SVG (.drag) — compatible desktop & mobile (pointer events) */
     (function(){
-      const svg = document.querySelector('svg');
+      const svg = document.getElementById('helloKittySvg'); // Get SVG by ID
       if (!svg) return;
+
+      // Function to set the viewBox based on screen width
+      function adjustSvgViewBox() {
+        if (window.innerWidth <= breakpoint) {
+          svg.setAttribute('viewBox', `0 0 ${mobileViewBoxWidth} ${mobileViewBoxHeight}`);
+        } else {
+          svg.setAttribute('viewBox', `0 0 ${originalViewBoxWidth} ${originalViewBoxHeight}`);
+        }
+      }
+
+      // Initial adjustment
+      adjustSvgViewBox();
+      // Adjust on window resize
+      window.addEventListener('resize', adjustSvgViewBox);
+
 
       // Convertit clientX/Y en coordonnées SVG
       function getSVGPoint(evt) {
@@ -461,10 +489,6 @@
         startRain();
 
         // Apply clamp to h1 using CSS variables from JS
-        // This is a direct override for h1 in the style block, but for utility class use:
-        // You'd ideally define custom utilities if not directly targeting the element.
-        // For this specific case, the original clamp was directly on h1, so we mimic that
-        // with CSS variables and apply it.
         const h1Element = document.querySelector('h1');
         if (h1Element) {
             h1Element.style.fontSize = `clamp(var(--clamp-h1-min), var(--clamp-h1-vw), var(--clamp-h1-max))`;
