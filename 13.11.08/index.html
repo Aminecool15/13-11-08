@@ -1,203 +1,56 @@
-<!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Birthday Cake 🎂</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap"
-      rel="stylesheet"
-    />
+<style>
+  /* Styles de texte responsives */
+  #mainTitle {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: clamp(20px, 6vw, 36px); /* s'adapte à la largeur de l'écran */
+    margin-bottom: 8px;
+    text-align: center;
+    word-break: break-word;
+  }
 
-    <style>
-      /* === TEXTES RESPONSIFS === */
-      #mainTitle {
-        font-family: 'Pixelify Sans', sans-serif;
-        font-size: clamp(20px, 6vw, 36px);
-        margin-bottom: 8px;
-        text-align: center;
-        word-break: break-word;
-      }
+  #subTitle {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: clamp(14px, 4.5vw, 22px);
+    color: #555;
+    text-align: center;
+    margin: 0 10px;
+  }
 
-      #subTitle {
-        font-family: 'Pixelify Sans', sans-serif;
-        font-size: clamp(14px, 4.5vw, 22px);
-        color: #555;
-        text-align: center;
-        margin: 0 10px;
-      }
+  #startButton {
+    margin-top: 20px;
+    background-color: #ffb6c1;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: clamp(14px, 4.5vw, 20px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
 
-      /* === BOUTON MICRO === */
-      #startButton {
-        margin-top: 20px;
-        background-color: #ffb6c1;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-family: 'Pixelify Sans', sans-serif;
-        font-size: clamp(14px, 4.5vw, 20px);
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
+  #startButton:hover {
+    background-color: #ff9eb0;
+    transform: scale(1.05);
+  }
 
-      #startButton:hover {
-        background-color: #ff9eb0;
-        transform: scale(1.05);
-      }
+  .hidden {
+    display: none;
+  }
 
-      .hidden {
-        display: none;
-      }
+  /* Optionnel : centrer l'ensemble du contenu sur tous les écrans */
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+  }
 
-      /* === STRUCTURE GLOBALE === */
-      .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 10px;
-      }
-
-      .cake-container {
-        position: relative;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <div id="birthdayText"></div>
-      <div class="cake-container">
-        <div class="cake" id="cake"></div>
-      </div>
-      <button id="startButton">🎤 Activer le micro</button>
-    </div>
-
-    <script>
-      // === Lecture des paramètres URL ===
-      const params = new URLSearchParams(window.location.search);
-      const name = params.get("name") || "Sima";
-      let candleCount = parseInt(params.get("candles")) || 4;
-      candleCount = Math.min(Math.max(candleCount, 1), 30);
-
-      const birthdayText = document.getElementById("birthdayText");
-      birthdayText.innerHTML = `
-        <div id="mainTitle">Joyeux anniversaire ${name}!</div>
-        <div id="subTitle">Souffle tes bougies ! (active d'abord le micro 🎤)</div>
-      `;
-
-      const cake = document.getElementById("cake");
-      const colors = ["green-candle", "purple-candle", "blue-candle", "yellow-candle"];
-      const CAKE_VISUAL_WIDTH = 35;
-
-      function createCandles(count) {
-        cake.innerHTML = "";
-        const CANDLE_VISUAL_WIDTH = 2;
-        const availableWidth = CAKE_VISUAL_WIDTH;
-        const candlesPerRow = 6;
-        const rowCount = Math.ceil(count / candlesPerRow);
-        const shiftAmount = 4;
-
-        for (let i = 0; i < count; i++) {
-          const candle = document.createElement("div");
-          candle.classList.add("candle");
-          const colorClass = colors[Math.floor(Math.random() * colors.length)];
-          candle.classList.add(colorClass);
-
-          const row = Math.floor(i / candlesPerRow);
-          const col = i % candlesPerRow;
-          const totalCandlesInRow = Math.min(candlesPerRow, count - row * candlesPerRow);
-          const rowSpacing = availableWidth / (totalCandlesInRow + 1);
-          const leftBase = rowSpacing * (col + 1) - CANDLE_VISUAL_WIDTH / 2 + 5;
-          const rowShift = row % 2 === 0 ? 0 : shiftAmount;
-
-          candle.style.position = "absolute";
-          candle.style.top = `${10 + row * 3}px`;
-          candle.style.left = `${leftBase - rowShift + 4}px`;
-
-          cake.appendChild(candle);
-        }
-      }
-
-      createCandles(candleCount);
-
-      // === Détection du souffle (sensible) ===
-      async function startMicDetection() {
-        try {
-          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          await audioContext.resume();
-
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: false, noiseSuppression: false },
-          });
-
-          const source = audioContext.createMediaStreamSource(stream);
-          const analyser = audioContext.createAnalyser();
-          analyser.fftSize = 512;
-          source.connect(analyser);
-
-          const dataArray = new Uint8Array(analyser.fftSize);
-          let blown = false;
-
-          function detectBlow() {
-            analyser.getByteTimeDomainData(dataArray);
-
-            let total = 0;
-            for (let i = 0; i < dataArray.length; i++) {
-              const deviation = Math.abs(dataArray[i] - 128);
-              total += deviation;
-            }
-
-            const avgAmplitude = total / dataArray.length;
-            const BLOW_AMPLITUDE_THRESHOLD = 8; // plus bas = plus sensible (6 à 8 recommandé)
-
-            if (avgAmplitude > BLOW_AMPLITUDE_THRESHOLD && !blown) {
-              blown = true;
-              blowOutCandles();
-            }
-
-            requestAnimationFrame(detectBlow);
-          }
-
-          detectBlow();
-        } catch (err) {
-          console.error("Erreur micro:", err);
-          alert("Impossible d'accéder au micro. Vérifie les permissions dans Safari.");
-        }
-      }
-
-      function blowOutCandles() {
-        const candles = document.querySelectorAll(".candle");
-        candles.forEach((candle) => {
-          const delay = Math.random() * 1000;
-          setTimeout(() => {
-            colors.forEach((color) => {
-              if (candle.classList.contains(color)) {
-                candle.classList.add("blown");
-              }
-            });
-          }, delay);
-        });
-
-        setTimeout(() => {
-          document.getElementById("subTitle").textContent = "Bougies éteintes ! 🎉";
-        }, 1200);
-      }
-
-      // === Activation manuelle sur iPhone ===
-      const startButton = document.getElementById("startButton");
-      startButton.addEventListener("click", async () => {
-        startButton.classList.add("hidden");
-        document.getElementById("subTitle").textContent = "Souffle sur l'écran 🎂";
-        await startMicDetection();
-      });
-    </script>
-  </body>
-</html>
+  .cake-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+</style>
